@@ -22,6 +22,38 @@ def index():
 
 # Add views here
 
+@app.route('/earthquakes/<int:id>', methods=['Get'])
+def earthquake(id):
+    earthquake = db.session.get(Earthquake, id)
+
+    if not earthquake:
+        return {"message": f"Earthquake {id} not found."}, 404
+    
+    return {
+        "id": earthquake.id,
+        "location": earthquake.location,
+        "magnitude": earthquake.magnitude,
+        "year": earthquake.year
+    }
+    
+@app.route('/earthquakes/magnitude/<float:magnitude>', methods=['Get'])
+def earthquakes_by_magnitude(magnitude):
+    earthquakes = Earthquake.query.filter(Earthquake.magnitude >= magnitude).all()
+
+    if not earthquakes:
+        return {"count": 0, "quakes": []}
+    
+    return {
+        "count": len(earthquakes),
+        "quakes": [
+            {
+                "id": eq.id,
+                "location": eq.location,
+                "magnitude": eq.magnitude,
+                "year": eq.year
+            } for eq in earthquakes
+        ]
+    }
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
